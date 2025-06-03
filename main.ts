@@ -148,12 +148,17 @@ async function checker() {
 
       tree.queryPoint(start, function (interval) {
         console.log('overlapped start ?', interval);
-        overlapStart = true;
+
+        if (!!interval) {
+          overlapStart = true;
+        }
       });
 
       tree.queryPoint(end, function (interval) {
         console.log('overlapped end ?', interval);
-        overlapEnd = true;
+        if (!!interval) {
+          overlapEnd = true;
+        }
       });
 
       if (overlapStart || overlapEnd) {
