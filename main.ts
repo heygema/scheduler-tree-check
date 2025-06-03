@@ -28,29 +28,7 @@ let existingSchedule = {
   updatedAt: '2025-06-03 06:09:20.913',
 };
 
-// let createdSchedule = {
-//   id: 'new Schedule',
-//   startDate: '2025-06-02 17:00:00',
-//   endDate: '2025-07-02 16:59:59.999',
-//   startHour: '00:00',
-//   endHour: '00:30',
-//   repeatFrequency: 'NONE',
-//   monday: false,
-//   tuesday: false,
-//   wednesday: false,
-//   thursday: false,
-//   friday: true,
-//   saturday: false,
-//   sunday: false,
-//   notes: '',
-//   color: '#4C31A3',
-//   deletedDates: [],
-//   deleted: false,
-//   createdAt: '2025-06-03 06:09:20.913',
-//   updatedAt: '2025-06-03 06:09:20.913',
-// };
-
-let schedule3 = {
+let newSchedule = {
   id: 'cmbg9wjd1000010o2qhu8lrgt',
   startDate: '2025-06-05 17:00:00',
   endDate: '2025-06-06 16:59:59.999',
@@ -151,13 +129,11 @@ function scheduleToTimeRanges(schedule: typeof existingSchedule) {
   return timeRanges;
 }
 
-async function main1() {
+async function checker() {
   // const start = process.hrtime.bigint();
   const timeRanges = scheduleToTimeRanges(existingSchedule);
-  console.log(timeRanges[10]);
-  const newTimeRanges = scheduleToTimeRanges(schedule3);
+  const newTimeRanges = scheduleToTimeRanges(newSchedule);
   const tree = createIntervalTree(timeRanges);
-  console.log('tree ?', timeRanges);
 
   console.log('Schedule 3 time ranges:', newTimeRanges);
   if (newTimeRanges.length > 0) {
@@ -177,19 +153,15 @@ async function main1() {
   } else {
     console.log('No time ranges generated for schedule3');
     console.log('Schedule3 details:', {
-      startDate: schedule3.startDate,
-      endDate: schedule3.endDate,
-      startHour: schedule3.startHour,
-      endHour: schedule3.endHour,
+      startDate: newSchedule.startDate,
+      endDate: newSchedule.endDate,
+      startHour: newSchedule.startHour,
+      endHour: newSchedule.endHour,
       activeDays: Object.keys(dayMap).filter(
-        (day) => schedule3[day as keyof typeof schedule3]
+        (day) => newSchedule[day as keyof typeof newSchedule]
       ),
     });
   }
-
-  // tree.queryPoint(1750870840000, function (interval) {
-  //   console.log('interval', interval);
-  // });
 
   // const end = process.hrtime.bigint();
   // console.log(`Took ${(end - start) / 1000n}ms`);
@@ -197,8 +169,8 @@ async function main1() {
 
 async function main() {
   const start = process.hrtime.bigint();
-  main1();
-  main1();
+  checker();
+  checker();
 
   const end = process.hrtime.bigint();
   console.log(`Took ${(end - start) / 1000n}ms`);
