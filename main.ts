@@ -1,0 +1,171 @@
+import createIntervalTree from 'npm:interval-tree-1d';
+
+let existingSchedule = {
+  id: 'cmbg4c64x0002xeppp6yobcl8',
+  startDate: '2025-06-02 17:00:00',
+  endDate: '2026-06-02 16:59:59.999',
+  startHour: '00:00',
+  endHour: '04:30',
+  repeatFrequency: 'NONE',
+  monday: false,
+  tuesday: false,
+  wednesday: true,
+  thursday: true,
+  friday: true,
+  saturday: false,
+  sunday: false,
+  notes: '',
+  color: '#4C31A3',
+  deletedDates: [
+    '2025-06-05T00:00:00.000Z',
+    '2025-06-10T00:00:00.000Z',
+    '2025-07-01T00:00:00.000Z',
+    '2025-07-22T00:00:00.000Z',
+    '2025-08-19T00:00:00.000Z',
+    '2025-09-16T00:00:00.000Z',
+  ],
+  deleted: false,
+  createdAt: '2025-06-03 06:09:20.913',
+  updatedAt: '2025-06-03 06:09:20.913',
+};
+
+let createdSchedule = {
+  id: 'new Schedule',
+  startDate: '2025-06-02 17:00:00',
+  endDate: '2025-07-02 16:59:59.999',
+  startHour: '00:00',
+  endHour: '00:30',
+  repeatFrequency: 'NONE',
+  monday: false,
+  tuesday: false,
+  wednesday: false,
+  thursday: false,
+  friday: true,
+  saturday: false,
+  sunday: false,
+  notes: '',
+  color: '#4C31A3',
+  deletedDates: [],
+  deleted: false,
+  createdAt: '2025-06-03 06:09:20.913',
+  updatedAt: '2025-06-03 06:09:20.913',
+};
+
+let schedule3 = {
+  id: 'cmbg9wjd1000010o2qhu8lrgt',
+  startDate: '2025-06-05 17:00:00',
+  endDate: '2025-06-06 16:59:59.999',
+  startHour: '01:00',
+  endHour: '03:00',
+  repeatFrequency: 'NONE',
+  monday: false,
+  tuesday: false,
+  wednesday: false,
+  thursday: false,
+  friday: true,
+  saturday: false,
+  sunday: false,
+  notes: '',
+  color: 'blue',
+  deletedDates: [],
+  deleted: false,
+  createdAt: '2025-06-03 08:45:09.253',
+  updatedAt: '2025-06-03 08:45:09.253',
+};
+
+function parseTimeToMinutes(timeStr: string) {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return hours * 60 + minutes;
+}
+
+function scheduleToTimeRanges(schedule: typeof existingSchedule) {
+  const startDate = new Date(schedule.startDate);
+  const endDate = new Date(schedule.endDate);
+  const startHourMinutes = parseTimeToMinutes(schedule.startHour);
+  const endHourMinutes = parseTimeToMinutes(schedule.endHour);
+
+  // Map day names to day numbers (0 = Sunday, 1 = Monday, etc.)
+  const dayMap = {
+    sunday: 0,
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+  };
+
+  // Get active days
+  const activeDays = Object.keys(dayMap).filter((day) => schedule[day]);
+  const activeDayNumbers = activeDays.map((day) => dayMap[day]);
+
+  // Set of deleted dates (in ISO format for easy comparison)
+  const deletedDates = new Set(
+    (schedule.deletedDates || []).map(
+      (date) => new Date(date).toISOString().split('T')[0]
+    )
+  );
+
+  // Generate all time ranges
+  const timeRanges: Array<Array<number>> = [];
+
+  for (
+    let date = new Date(startDate);
+    date <= endDate;
+    date.setDate(date.getDate() + 1)
+  ) {
+    const dayOfWeek = date.getDay();
+
+    // Skip if not an active day
+    if (!activeDayNumbers.includes(dayOfWeek)) {
+      continue;
+    }
+
+    // Skip if this date is deleted
+    const dateIso = date.toISOString().split('T')[0];
+    if (deletedDates.has(dateIso)) {
+      continue;
+    }
+
+    // Create time range for this day
+    const dayStart = new Date(date);
+    dayStart.setHours(
+      Math.floor(startHourMinutes / 60),
+      startHourMinutes % 60,
+      0,
+      0
+    );
+
+    const dayEnd = new Date(date);
+    dayEnd.setHours(Math.floor(endHourMinutes / 60), endHourMinutes % 60, 0, 0);
+
+    // Add as unix timestamps
+    timeRanges.push([dayStart.getTime(), dayEnd.getTime()]);
+  }
+
+  return timeRanges;
+}
+
+async function main() {
+  const start = process.hrtime.bigint();
+  const timeRanges = scheduleToTimeRanges(existingSchedule);
+  // console.log(timeRanges[10]);
+  const newTimeRanges = scheduleToTimeRanges(schedule3);
+  const tree = createIntervalTree(timeRanges);
+
+  console.log(newTimeRanges);
+  for (let [start, end] of newTimeRanges) {
+    let tr = end - start;
+    console.log('what ?');
+    console.log(tr);
+  }
+
+  // tree.queryPoint(1750870840000, function (interval) {
+  //   console.log('interval', interval);
+  // });
+
+  const end = process.hrtime.bigint();
+  console.log(`Took ${(end - start) / 1000n}ms`);
+}
+
+main().catch(console.error);
