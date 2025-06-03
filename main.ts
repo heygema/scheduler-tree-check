@@ -170,8 +170,6 @@ async function checker() {
 async function main() {
   const start = process.hrtime.bigint();
   checker();
-  checker();
-
   const end = process.hrtime.bigint();
   console.log(`Took ${(end - start) / 1000n}ms`);
 }
