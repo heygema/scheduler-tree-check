@@ -97,7 +97,7 @@ function scheduleToTimeRanges(schedule: typeof existingSchedule) {
     date.setDate(date.getDate() + 1)
   ) {
     // bcs utc
-    const dayOfWeek = date.getDay() + 1;
+    const dayOfWeek = (date.getDay() + 1) % 7;
 
     // Skip if not an active day
     if (!activeDayNumbers.includes(dayOfWeek)) {
@@ -181,7 +181,7 @@ async function main() {
   const start = process.hrtime.bigint();
   checker();
   const end = process.hrtime.bigint();
-  console.log(`Took ${(end - start) / 1000n}ms`);
+  console.log(`Took ${(end - start) / 1000000n}ms`);
 }
 
 main().catch(console.error);
