@@ -138,6 +138,8 @@ async function checker() {
   console.log('Schedule 3 time ranges:', newTimeRanges);
   if (newTimeRanges.length > 0) {
     for (let [start, end] of newTimeRanges) {
+      let overlapStart = false;
+      let overlapEnd = false;
       console.log(
         `Time range: ${new Date(start).toLocaleString()} to ${new Date(
           end
@@ -145,8 +147,18 @@ async function checker() {
       );
 
       tree.queryPoint(start, function (interval) {
-        console.log('overlapped ?', interval);
+        console.log('overlapped start ?', interval);
+        overlapStart = true;
       });
+
+      tree.queryPoint(end, function (interval) {
+        console.log('overlapped end ?', interval);
+        overlapEnd = true;
+      });
+
+      if (overlapStart || overlapEnd) {
+        console.log('Overlap found!', { overlapStart, overlapEnd });
+      }
     }
   } else {
     console.log('No time ranges generated for schedule3');
