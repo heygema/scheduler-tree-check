@@ -187,7 +187,7 @@ async function checker() {
 
 async function main() {
   const start = process.hrtime.bigint();
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 10000; i++) {
     checker();
   }
   const end = process.hrtime.bigint();
