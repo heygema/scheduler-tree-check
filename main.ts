@@ -17,8 +17,7 @@ let existingSchedule = {
   notes: '',
   color: '#4C31A3',
   deletedDates: [
-    '2025-06-05T00:00:00.000Z',
-    '2025-06-10T00:00:00.000Z',
+    // '2025-06-05T00:00:00.000Z',
     '2025-07-01T00:00:00.000Z',
     '2025-07-22T00:00:00.000Z',
     '2025-08-19T00:00:00.000Z',
@@ -29,27 +28,27 @@ let existingSchedule = {
   updatedAt: '2025-06-03 06:09:20.913',
 };
 
-let createdSchedule = {
-  id: 'new Schedule',
-  startDate: '2025-06-02 17:00:00',
-  endDate: '2025-07-02 16:59:59.999',
-  startHour: '00:00',
-  endHour: '00:30',
-  repeatFrequency: 'NONE',
-  monday: false,
-  tuesday: false,
-  wednesday: false,
-  thursday: false,
-  friday: true,
-  saturday: false,
-  sunday: false,
-  notes: '',
-  color: '#4C31A3',
-  deletedDates: [],
-  deleted: false,
-  createdAt: '2025-06-03 06:09:20.913',
-  updatedAt: '2025-06-03 06:09:20.913',
-};
+// let createdSchedule = {
+//   id: 'new Schedule',
+//   startDate: '2025-06-02 17:00:00',
+//   endDate: '2025-07-02 16:59:59.999',
+//   startHour: '00:00',
+//   endHour: '00:30',
+//   repeatFrequency: 'NONE',
+//   monday: false,
+//   tuesday: false,
+//   wednesday: false,
+//   thursday: false,
+//   friday: true,
+//   saturday: false,
+//   sunday: false,
+//   notes: '',
+//   color: '#4C31A3',
+//   deletedDates: [],
+//   deleted: false,
+//   createdAt: '2025-06-03 06:09:20.913',
+//   updatedAt: '2025-06-03 06:09:20.913',
+// };
 
 let schedule3 = {
   id: 'cmbg9wjd1000010o2qhu8lrgt',
@@ -78,25 +77,30 @@ function parseTimeToMinutes(timeStr: string) {
   return hours * 60 + minutes;
 }
 
+// Map day names to day numbers (0 = Sunday, 1 = Monday, etc.)
+const dayMap: Record<string, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
+
 function scheduleToTimeRanges(schedule: typeof existingSchedule) {
   const startDate = new Date(schedule.startDate);
   const endDate = new Date(schedule.endDate);
   const startHourMinutes = parseTimeToMinutes(schedule.startHour);
   const endHourMinutes = parseTimeToMinutes(schedule.endHour);
 
-  // Map day names to day numbers (0 = Sunday, 1 = Monday, etc.)
-  const dayMap = {
-    sunday: 0,
-    monday: 1,
-    tuesday: 2,
-    wednesday: 3,
-    thursday: 4,
-    friday: 5,
-    saturday: 6,
-  };
+  // Use the global dayMap
 
   // Get active days
-  const activeDays = Object.keys(dayMap).filter((day) => schedule[day]);
+  const activeDays = Object.keys(dayMap).filter(
+    (day) => schedule[day as keyof typeof schedule]
+  );
+
   const activeDayNumbers = activeDays.map((day) => dayMap[day]);
 
   // Set of deleted dates (in ISO format for easy comparison)
@@ -114,7 +118,8 @@ function scheduleToTimeRanges(schedule: typeof existingSchedule) {
     date <= endDate;
     date.setDate(date.getDate() + 1)
   ) {
-    const dayOfWeek = date.getDay();
+    // bcs utc
+    const dayOfWeek = date.getDay() + 1;
 
     // Skip if not an active day
     if (!activeDayNumbers.includes(dayOfWeek)) {
@@ -146,23 +151,54 @@ function scheduleToTimeRanges(schedule: typeof existingSchedule) {
   return timeRanges;
 }
 
-async function main() {
-  const start = process.hrtime.bigint();
+async function main1() {
+  // const start = process.hrtime.bigint();
   const timeRanges = scheduleToTimeRanges(existingSchedule);
-  // console.log(timeRanges[10]);
+  console.log(timeRanges[10]);
   const newTimeRanges = scheduleToTimeRanges(schedule3);
   const tree = createIntervalTree(timeRanges);
+  console.log('tree ?', timeRanges);
 
-  console.log(newTimeRanges);
-  for (let [start, end] of newTimeRanges) {
-    let tr = end - start;
-    console.log('what ?');
-    console.log(tr);
+  console.log('Schedule 3 time ranges:', newTimeRanges);
+  if (newTimeRanges.length > 0) {
+    for (let [start, end] of newTimeRanges) {
+      let duration = end - start;
+      console.log(
+        `Time range: ${new Date(start).toLocaleString()} to ${new Date(
+          end
+        ).toLocaleString()}`
+      );
+      console.log(`Duration in ms: ${duration}`);
+
+      tree.queryPoint(start, function (interval) {
+        console.log('overlapped ?', interval);
+      });
+    }
+  } else {
+    console.log('No time ranges generated for schedule3');
+    console.log('Schedule3 details:', {
+      startDate: schedule3.startDate,
+      endDate: schedule3.endDate,
+      startHour: schedule3.startHour,
+      endHour: schedule3.endHour,
+      activeDays: Object.keys(dayMap).filter(
+        (day) => schedule3[day as keyof typeof schedule3]
+      ),
+    });
   }
 
   // tree.queryPoint(1750870840000, function (interval) {
   //   console.log('interval', interval);
   // });
+
+  // const end = process.hrtime.bigint();
+  // console.log(`Took ${(end - start) / 1000n}ms`);
+}
+
+async function main() {
+  const start = process.hrtime.bigint();
+  main1();
+  main1();
 
   const end = process.hrtime.bigint();
   console.log(`Took ${(end - start) / 1000n}ms`);
