@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "interval-tree-1d": "^1.0.4"
+  }
+}

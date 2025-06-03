@@ -136,55 +136,60 @@ async function checker() {
   const tree = createIntervalTree(timeRanges);
 
   console.log('Schedule 3 time ranges:', newTimeRanges);
-  if (newTimeRanges.length > 0) {
-    for (let [start, end] of newTimeRanges) {
-      let overlapStart = false;
-      let overlapEnd = false;
-      console.log(
-        `Time range: ${new Date(start).toLocaleString()} to ${new Date(
-          end
-        ).toLocaleString()}`
-      );
+  // if (newTimeRanges.length > 0) {
+  let overlapCount = 0;
+  for (let [start, end] of newTimeRanges) {
+    let overlapStart = false;
+    let overlapEnd = false;
+    console.log(
+      `Time range: ${new Date(start).toLocaleString()} to ${new Date(
+        end
+      ).toLocaleString()}`
+    );
 
-      tree.queryPoint(start, function (interval) {
-        console.log('overlapped start ?', interval);
+    tree.queryPoint(start, function (interval) {
+      console.log('overlapped start ?', interval);
 
-        if (!!interval) {
-          overlapStart = true;
-        }
-      });
-
-      tree.queryPoint(end, function (interval) {
-        console.log('overlapped end ?', interval);
-        if (!!interval) {
-          overlapEnd = true;
-        }
-      });
-
-      if (overlapStart || overlapEnd) {
-        console.log('Overlap found!', { overlapStart, overlapEnd });
+      if (!!interval) {
+        overlapStart = true;
       }
-    }
-  } else {
-    console.log('No time ranges generated for schedule3');
-    console.log('Schedule3 details:', {
-      startDate: newSchedule.startDate,
-      endDate: newSchedule.endDate,
-      startHour: newSchedule.startHour,
-      endHour: newSchedule.endHour,
-      activeDays: Object.keys(dayMap).filter(
-        (day) => newSchedule[day as keyof typeof newSchedule]
-      ),
     });
+
+    tree.queryPoint(end, function (interval) {
+      console.log('overlapped end ?', interval);
+      if (!!interval) {
+        overlapEnd = true;
+      }
+    });
+
+    if (overlapStart || overlapEnd) {
+      // console.log('Overlap found!', { overlapStart, overlapEnd });
+      overlapCount++;
+    }
   }
+  // } else {
+  //   console.log('No time ranges generated for schedule3');
+  //   console.log('Schedule3 details:', {
+  //     startDate: newSchedule.startDate,
+  //     endDate: newSchedule.endDate,
+  //     startHour: newSchedule.startHour,
+  //     endHour: newSchedule.endHour,
+  //     activeDays: Object.keys(dayMap).filter(
+  //       (day) => newSchedule[day as keyof typeof newSchedule]
+  //     ),
+  //   });
+  // }
 
   // const end = process.hrtime.bigint();
   // console.log(`Took ${(end - start) / 1000n}ms`);
+  console.log('Overlap count:', overlapCount);
 }
 
 async function main() {
   const start = process.hrtime.bigint();
-  checker();
+  for (let i = 0; i < 1000; i++) {
+    checker();
+  }
   const end = process.hrtime.bigint();
   console.log(`Took ${(end - start) / 1000000n}ms`);
 }
