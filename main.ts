@@ -129,6 +129,8 @@ function scheduleToTimeRanges(schedule: typeof existingSchedule) {
   return timeRanges;
 }
 
+let overlapCount = 0;
+
 async function checker() {
   // const start = process.hrtime.bigint();
   const timeRanges = scheduleToTimeRanges(existingSchedule);
@@ -137,7 +139,6 @@ async function checker() {
 
   console.log('Schedule 3 time ranges:', newTimeRanges);
   // if (newTimeRanges.length > 0) {
-  let overlapCount = 0;
   for (let [start, end] of newTimeRanges) {
     let overlapStart = false;
     let overlapEnd = false;
