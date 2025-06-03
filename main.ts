@@ -138,13 +138,11 @@ async function checker() {
   console.log('Schedule 3 time ranges:', newTimeRanges);
   if (newTimeRanges.length > 0) {
     for (let [start, end] of newTimeRanges) {
-      let duration = end - start;
       console.log(
         `Time range: ${new Date(start).toLocaleString()} to ${new Date(
           end
         ).toLocaleString()}`
       );
-      console.log(`Duration in ms: ${duration}`);
 
       tree.queryPoint(start, function (interval) {
         console.log('overlapped ?', interval);
